@@ -35,49 +35,27 @@ summaryDict = {"dataPt":0, "actualDuration":0, "sample_rate":0}
 ######  FIND BITSCOPE #######################################
 
 def findBS():
-    # bsInfo = bv.BitScopeInfo()
-    # bsCount = bv.listBitScopes(100, pointer(bsInfo)) #Eveyone needs 100 bitscopes at least
-
-# if bsCount == 0:
-#     print("Couldn't find a BitScope.")
-#     exit()
-
- 
+    bsInfo = (bv.BitScopeInfo*10)()
+    bsCount = bv.listBitScopes(10, bsInfo)
+    
     connectedBS=[]
-    # for cnt in range(bsCount):
-    #     connectedBS.append(str(bsInfo.model).strip("'").strip("b").strip("'"))
-    # bs = bv.openBitScope(bsInfo.port)
+    for cnt in range(bsCount):
+        tempStr = str(bsInfo[cnt].model).strip('b').strip("'")
+        print(type(tempStr))
+        bv.openBitScope(bsInfo[0].port)
+        connectedBS.append(tempStr)
     return connectedBS
 
 #############################################################
 ###### SETTINGS FROM FRONT PANEL ############################
-    
-    # return com
-def testMode(input):
-    global val    
-    return val
-
-def channelMode(isDual,CHA,CHB):
-    global val    
-    return val
-
-def mixed(mode):    
-    return val
-
-
+  
 def setupBS():
     print('setUpBS started')
     print(userParam)
-    # testMode(userParam["testMode"]) #Trace Mode=> Stream mode (Macro Analogue Chop (is 03))
-    # channelMode(userParam["isDual"],userParam["CHA"],userParam["CHB"]) #Analog channel enable (bitmap) Analogue ch enable (both)
-    
-    bsInfo = bv.BitScopeInfo()
-    bsCount = bv.listBitScopes(2, pointer(bsInfo))
-
-    bs = bv.openBitScope(bsInfo.port)    
 
     bv.mode(bs, bv.STREAM_SINGLE)
     bv.enableAnalogueChannel(bs, bv.CHA)
+    bv.rate(bs, (userParam["sampleRate"]))
     bv.dumpSize(bs, 2000)
     bv.range(bs, 5) # v
     bv.offset(bs, 1) # v
@@ -104,6 +82,7 @@ def startStreaming():
 def stopStreaming():
     print('strm stoppend')
     bv.cancel(bs)
+    bv.updateBitScope(bs)
     stopTime = float(time.time())
     return stopTime
 
@@ -155,7 +134,6 @@ def streamDataDual(startTime, duration):
 
 def getStreamFast(sample):
     startTime = time.time()
-    
     
 
     data = (c_ubyte * 2000)() # set size of unsigned char array
